@@ -19,45 +19,53 @@ $(document).ready(function () {
         destination: null,
         firstTrainTimtime: null,
         frequency: 0,
-     
         waittingTime:0,
         arrivalTime:0,
+        isUpdate:false,
+        selectedKey:null,
     };
     
     displayInTable();
     $("#addBtn").on("click", function () {
        
        debugger
-        trainObj.trainName = $("#train-name").val();
+       trainObj.trainName = $("#train-name").val();
         trainObj.destination = $("#dastination").val();
         if($("#frequency").val()!==""){
         trainObj.frequency = $("#frequency").val();
         }
-        debugger;
+      
         trainObj.firstTrainTimtime=$("#time").val();
-        debugger;
+ 
         calculateWattingTime(trainObj.firstTrainTimtime,trainObj.frequency);
-        debugger;
+   
+       if(!trainObj.isUpdate){
+        
         ref.push(trainObj);
-        displayInTable();
+    }
+    else if(trainObj.isUpdate){
+debugger
+        // var updateRef = db.ref;
+          ref.child(trainObj.selectedKey).update(trainObj);
+          console.log(ref.child(trainObj.selectedKey));
+          trainObj.isUpdate=false;
+    }
+        //displayInTable();
         // console.log(trainObj.time);
        // console.log();
     });
     
     
     function displayInTable(){
-        debugger;
+        // debugger;
         ref.on('value', function (data) {
 
-            
+             // chack if there is  an array 
             if (typeof Object.keys(data) === 'undefined' ||  Object.keys(data).length === 0 || data === null ) {
-                // You have an array 
-                console.log("am here");
+               
                 return;
             }
-
-
-
+            
             var trainSchedule = data.val();
             // if(trainSchedule!==null || trainSchedule!==undefined);
             // {
@@ -72,8 +80,8 @@ $(document).ready(function () {
                 removeBtn.addClass("remove");
                 updatBtn.text("Update");
                 removeBtn.text("Remove");
-                updatBtn.attr("value",keys[0]);
-                removeBtn.attr("value",keys[0]);
+                updatBtn.attr("value",element);
+                removeBtn.attr("value",element);
                 var col = $("<td>");
                 var col2 = $("<td>");
                 var col3 = $("<td>");
@@ -101,8 +109,8 @@ $(document).ready(function () {
         
     }
     
-         function convertMinsToHrsMins(minutes) {
-             debugger
+         function convertMintsToHrs(minutes) {
+            //  debugger
             var h = Math.floor(minutes / 60);
             var m = minutes % 60;
             h = h < 10 ? '0' + h : h;
@@ -130,7 +138,7 @@ $(document).ready(function () {
                 y =Math.floor ( (currentTime - startTime) /  frq ) + 1;
                 trainObj.waittingTime =((y*frq)+startTime) - currentTime;
                 trainObj.arrivalTime= (y*frq + startTime);
-                trainObj.arrivalTime=convertMinsToHrsMins(trainObj.arrivalTime) 
+                trainObj.arrivalTime=convertMintsToHrs(trainObj.arrivalTime) 
             }
             console.log(trainObj);
         }
@@ -143,12 +151,13 @@ $(document).ready(function () {
         }
         $(document).on("click",".update",function(){
           debugger
-          var selectedKey=$(this).val();
+          trainObj.isUpdate=true;
+           trainObj.selectedKey=$(this).val();
           ref.on('value', function (data) {
 
             
             if (typeof Object.keys(data) === 'undefined' ||  Object.keys(data).length === 0 || data === null ) {
-                // You have an array 
+               
                 console.log("am here");
                 return;
             }
@@ -156,7 +165,7 @@ $(document).ready(function () {
             var keys=Object.keys(trainSchedule);
              keys.forEach(element => {
 
-                if(keys[0] === selectedKey){
+                if(element === trainObj.selectedKey){
                     $("#train-name").val(trainSchedule[element].trainName);
                     $("#dastination").val(trainSchedule[element].destination);
                     
@@ -169,4 +178,11 @@ $(document).ready(function () {
 
         
         })   
-   
+    });
+    $(document).on("click",".remove",function(){
+        debugger;
+        var key =$(this).val();
+        ref.child(key).remove();
+
+    })
+})
