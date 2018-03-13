@@ -9,12 +9,12 @@ $(document).ready(function () {
         messagingSenderId: "837949321578"
     };
     firebase.initializeApp(config);
-    console.log(firebase);
+   // console.log(firebase);
     var db = firebase.database();
     var ref = db.ref('trainSchedule');
     var providerGoogle = new firebase.auth.GoogleAuthProvider();
     var providerGithub = new firebase.auth.GithubAuthProvider();
-    console.log(ref);
+    //console.log(ref);
 
     var trainObj = {
         trainName: null,
@@ -66,63 +66,55 @@ $(document).ready(function () {
       });
     
     displayInTable();
+    //accept all user data and run calculteWattingTime function to get watting time ,
+    //and add object to firbase if rainObj.isUpdate is flase or update object to firbase if rainObj.isUpdate is true.
     $("#addBtn").on("click", function () {
-       
-       debugger
+        
        trainObj.trainName = $("#train-name").val();
         trainObj.destination = $("#dastination").val();
-        if($("#frequency").val()!==""){
         trainObj.frequency = $("#frequency").val();
-        }
-      
         trainObj.firstTrainTimtime=$("#time").val();
  
         calculateWattingTime(trainObj.firstTrainTimtime,trainObj.frequency);
-   
+   //add new data in firbase 
        if(!trainObj.isUpdate){
         
         ref.push(trainObj);
     }
-    else if(trainObj.isUpdate){
-debugger
-        // var updateRef = db.ref;
+    //update firbase data by using selectedkey  
+    else if(trainObj.isUpdate){ 
           ref.child(trainObj.selectedKey).update(trainObj);
-          console.log(ref.child(trainObj.selectedKey));
           trainObj.isUpdate=false;
     }
-        //displayInTable();
-        // console.log(trainObj.time);
-       // console.log();
+        
     });
     
-    
+    //get data from firebase as an object and change it to array and store array elements in table  
     function displayInTable(){
-        // debugger;
+        
         ref.on('value', function (data) {
-
-             // chack if there is  an array 
+            
+             // chack if there is  a data 
             if (typeof Object.keys(data) === 'undefined' ||  Object.keys(data).length === 0 || data === null ) {
                
                 return;
             }
-            
             var trainSchedule = data.val();
-            // if(trainSchedule!==null || trainSchedule!==undefined);
-            // {
+            //console.log(trainSchedule);
             var keys = Object.keys(trainSchedule);
+            //console.log(keys);
             $('#table').find('tbody').empty();
             keys.forEach(element => {
 
                 var row = $("<tr>");
                 var updatBtn=$("<button>");
                 var removeBtn=$("<button>");
-                updatBtn.addClass("update");
-                removeBtn.addClass("remove");
-                removeBtn.css("margin-left","3px")
+                updatBtn.addClass("update btn-success");
+                removeBtn.addClass("remove btn-success ml-2");
                 updatBtn.text("Update");
                 removeBtn.text("Remove");
-                updatBtn.attr("value",element);
-                removeBtn.attr("value",element);
+                updatBtn.attr("value",element);//give an element(object name) as a value , it will use for update.
+                removeBtn.attr("value",element);//give an element(object name) as a value , it will use for remove.
                 var col = $("<td>");
                 var col2 = $("<td>");
                 var col3 = $("<td>");
@@ -149,25 +141,23 @@ debugger
         });
         
     }
-    
+        //accepts minutes and change to hours
          function convertMintsToHrs(minutes) {
-            //  debugger
+           
             var h = Math.floor(minutes / 60);
             var m = minutes % 60;
             h = h < 10 ? '0' + h : h;
             m = m < 10 ? '0' + m : m;
-            
             return (h > 12) ? h-12+":"+m+" P.M." : h+":"+m+" A.M.";
        
           }
-
         function calculateWattingTime(time,frq){
            
             var date=new Date()
             let currentTime=changeToMin(date.getHours() + ":" + date.getMinutes());
 
             let startTime = changeToMin(time);
-            debugger;
+           // debugger;
             let arrivalTime=0;
             
             let y = (currentTime - startTime) % frq;
@@ -181,25 +171,24 @@ debugger
                 trainObj.arrivalTime= (y*frq + startTime);
                 trainObj.arrivalTime=convertMintsToHrs(trainObj.arrivalTime) 
             }
-            console.log(trainObj);
+           
         }
-        // accepts hh:mm
+        // accepts hours (hh:mm) and change it to minutes
         function changeToMin(time){
              let timeSplit = time.split(':');
              let hours = parseInt(timeSplit[0]);
              let minutes = parseInt(timeSplit[1]); 
                return (hours*60) + minutes;
         }
+        //get data from firbase and lode in the form by using selectedkey 
         $(document).on("click",".update",function(){
-          debugger
+          
           trainObj.isUpdate=true;
-           trainObj.selectedKey=$(this).val();
+           trainObj.selectedKey=$(this).val();//get updated element(object name) form button value
           ref.on('value', function (data) {
-
-            
+            //chack if there is  a data 
             if (typeof Object.keys(data) === 'undefined' ||  Object.keys(data).length === 0 || data === null ) {
                
-                console.log("am here");
                 return;
             }
             var trainSchedule=data.val();
@@ -220,8 +209,9 @@ debugger
         
         })   
     });
+    //remove data from firbase .
     $(document).on("click",".remove",function(){
-        debugger;
+       // debugger;
         var key =$(this).val();
         ref.child(key).remove();
 
