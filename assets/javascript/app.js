@@ -12,7 +12,7 @@ $(document).ready(function () {
    // console.log(firebase);
     var db = firebase.database();
     var ref = db.ref('trainSchedule');
-    var providerGoogle = new firebase.auth.GoogleAuthProvider();
+    // var providerGoogle = new firebase.auth.GoogleAuthProvider();
     var providerGithub = new firebase.auth.GithubAuthProvider();
     //console.log(ref);
 
@@ -26,22 +26,22 @@ $(document).ready(function () {
         isUpdate:false,
         selectedKey:null,
     };
-    firebase.auth().signInWithPopup(providerGoogle).then(function(result) {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        var token = result.credential.accessToken;
-        // The signed-in user info.
-        var user = result.user;
-        // ...
-      }).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        // ...
-      });
+    // firebase.auth().signInWithPopup(providerGoogle).then(function(result) {
+    //     // This gives you a Google Access Token. You can use it to access the Google API.
+    //     var token = result.credential.accessToken;
+    //     // The signed-in user info.
+    //     var user = result.user;
+    //     // ...
+    //   }).catch(function(error) {
+    //     // Handle Errors here.
+    //     var errorCode = error.code;
+    //     var errorMessage = error.message;
+    //     // The email of the user's account used.
+    //     var email = error.email;
+    //     // The firebase.auth.AuthCredential type that was used.
+    //     var credential = error.credential;
+    //     // ...
+    //   });
       firebase.auth().signInWithPopup(providerGithub).then(function(result) {
         // This gives you a GitHub Access Token. You can use it to access the GitHub API.
         var token = result.credential.accessToken;
@@ -89,19 +89,19 @@ $(document).ready(function () {
         
     });
     
-    //get data from firebase as an object and change it to array and store array elements in table  
+    //get snapshot from firebase as an object and change it to array and store array elements in table  
     function displayInTable(){
         
-        ref.on('value', function (data) {
+        ref.on('value', function (snapshot) {
             
-             // chack if there is  a data 
-            if (typeof Object.keys(data) === 'undefined' ||  Object.keys(data).length === 0 || data === null ) {
+             // chack if there is  a snapshot 
+            if (typeof Object.keys(snapshot) === 'undefined' ||  Object.keys(snapshot).length === 0 || snapshot === null ) {
                
                 return;
             }
-            var trainSchedule = data.val();
+            var trainData = snapshot.val();
             //console.log(trainSchedule);
-            var keys = Object.keys(trainSchedule);
+            var keys = Object.keys(trainData);
             //console.log(keys);
             $('#table').find('tbody').empty();
             keys.forEach(element => {
@@ -122,11 +122,11 @@ $(document).ready(function () {
                 var col5 = $("<td>");
                 var col6 = $("<td>");
                 
-                col.text(trainSchedule[element].trainName);
-                col2.text(trainSchedule[element].destination);
-                col3.text(trainSchedule[element].frequency);
-                col4.text(trainSchedule[element].arrivalTime);
-                col5.text(trainSchedule[element].waittingTime);
+                col.text(trainData[element].trainName);
+                col2.text(trainData[element].destination);
+                col3.text(trainData[element].frequency);
+                col4.text(trainData[element].arrivalTime);
+                col5.text(trainData[element].waittingTime);
                 col6.append(updatBtn,removeBtn);
                 row.append(col);
                 row.append(col2);
@@ -180,28 +180,28 @@ $(document).ready(function () {
              let minutes = parseInt(timeSplit[1]); 
                return (hours*60) + minutes;
         }
-        //get data from firbase and lode in the form by using selectedkey 
+        //get snapshot from firbase and lode in the form by using selectedkey 
         $(document).on("click",".update",function(){
           
           trainObj.isUpdate=true;
            trainObj.selectedKey=$(this).val();//get updated element(object name) form button value
-          ref.on('value', function (data) {
-            //chack if there is  a data 
-            if (typeof Object.keys(data) === 'undefined' ||  Object.keys(data).length === 0 || data === null ) {
+          ref.on('value', function (snapshot) {
+            //chack if there is  a snapshot 
+            if (typeof Object.keys(snapshot) === 'undefined' ||  Object.keys(snapshot).length === 0 || snapshot === null ) {
                
                 return;
             }
-            var trainSchedule=data.val();
-            var keys=Object.keys(trainSchedule);
+            var trainData=snapshot.val();
+            var keys=Object.keys(trainData);
              keys.forEach(element => {
 
                 if(element === trainObj.selectedKey){
-                    $("#train-name").val(trainSchedule[element].trainName);
-                    $("#dastination").val(trainSchedule[element].destination);
+                    $("#train-name").val(trainData[element].trainName);
+                    $("#dastination").val(trainData[element].destination);
                     
-                  $("#frequency").val(trainSchedule[element].frequency);
+                  $("#frequency").val(trainData[element].frequency);
                     
-                  $("#time").val(trainSchedule[element].firstTrainTimtime);
+                  $("#time").val(trainData[element].firstTrainTimtime);
 
                 }
             });
@@ -209,11 +209,22 @@ $(document).ready(function () {
         
         })   
     });
-    //remove data from firbase .
+    //remove data from firbase 
     $(document).on("click",".remove",function(){
        // debugger;
         var key =$(this).val();
         ref.child(key).remove();
 
     })
+    $("#clearBtn").on("click",function(){
+
+        $("#train-name").val("");
+        $("#dastination").val("");
+        
+      $("#frequency").val("");
+        
+     // $("#time").val(trainData[element].firstTrainTimtime);
+
+
+    });
 })
