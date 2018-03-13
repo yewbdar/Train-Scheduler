@@ -12,6 +12,8 @@ $(document).ready(function () {
     console.log(firebase);
     var db = firebase.database();
     var ref = db.ref('trainSchedule');
+    var providerGoogle = new firebase.auth.GoogleAuthProvider();
+    var providerGithub = new firebase.auth.GithubAuthProvider();
     console.log(ref);
 
     var trainObj = {
@@ -24,6 +26,44 @@ $(document).ready(function () {
         isUpdate:false,
         selectedKey:null,
     };
+    firebase.auth().signInWithPopup(providerGoogle).then(function(result) {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = result.credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...
+      }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        // ...
+      });
+      firebase.auth().signInWithPopup(providerGithub).then(function(result) {
+        // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+        var token = result.credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...
+      }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        // ...
+      });
+
+      firebase.auth().signOut().then(function() {
+        // Sign-out successful.
+      }).catch(function(error) {
+        // An error happened.
+      });
     
     displayInTable();
     $("#addBtn").on("click", function () {
@@ -78,6 +118,7 @@ debugger
                 var removeBtn=$("<button>");
                 updatBtn.addClass("update");
                 removeBtn.addClass("remove");
+                removeBtn.css("margin-left","3px")
                 updatBtn.text("Update");
                 removeBtn.text("Remove");
                 updatBtn.attr("value",element);
