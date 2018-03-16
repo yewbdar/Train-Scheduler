@@ -57,7 +57,7 @@ $(document).ready(function () {
     //and add object to firbase if isUpdate is flase or update  if isUpdate is true.
     $("#addBtn").on("click", function () {
 
-        // //add new data in firbase 
+         //add new data in firbase 
         if (validation()) {
             trainObj.trainName = $("#train-name").val();
             trainObj.destination = $("#dastination").val();
@@ -75,7 +75,7 @@ $(document).ready(function () {
         }
     });
 
-    //get snapshot from firebase as an object and change it to array and store array elements in table  
+    //get snapshot from firebase  and get  object key  as an  array and store array elements in table  
 
     var trainData = null;
     ref.on('value', function (snapshot) {
@@ -126,7 +126,7 @@ $(document).ready(function () {
 
 
     });
-
+    //calculate watting time and arrival time 
     function calculateWattingTime(time, frq) {
 
 
@@ -139,10 +139,10 @@ $(document).ready(function () {
         remainingTime = minuteDiffernce % frq;
 
         calculatObj.waittingTime = frq - remainingTime;
-        calculatObj.arrivalTime = moment().add(calculatObj.waittingTime, "minute").format("hh:mm: A");
+        calculatObj.arrivalTime = moment().add(calculatObj.waittingTime, "minute").format("hh:mm A");
 
     }
-    //get snapshot from firbase and lode in the form by using selectedkey 
+    //using snapshot  and lode in the form for updat by using selectedkey 
     $(document).on("click", ".update", function () {
         debugger;
         calculatObj.isUpdate = true;
@@ -168,8 +168,9 @@ $(document).ready(function () {
 
     })
 });
+// validate input
 function validation() {
-    debugger;
+   
     var valid = true;
     var newreg = /^(([0-1][0-9])|(2[0-3])):[0-5][0-9]$/;
     var time = $("#time").val();
@@ -210,6 +211,7 @@ $(document).on("click", ".remove", function () {
     ref.child(key).remove();
 
 })
+//clear the input form
 $("#clearBtn").on("click", function () {
 
     $("#train-name").val("");
